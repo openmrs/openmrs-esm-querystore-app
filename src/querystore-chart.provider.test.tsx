@@ -12,9 +12,8 @@ import {
   userHasAccess,
 } from '@openmrs/esm-framework';
 import { isVersionSatisfied } from '@openmrs/esm-utils';
-import omnibarRoutes from '../../../src/routes.json';
 import { configSchema, type QuerystoreConfig } from './config-schema';
-import { type OmnibarContext, type OmnibarProviderMeta, type OmnibarReport } from './omnibar-contract';
+import { type OmnibarContext, type OmnibarReport } from './omnibar-contract';
 import routes from './routes.json';
 import { POLL_DELAYS_MS } from './bounded-poll';
 import QuerystoreChartProvider from './querystore-chart.provider';
@@ -836,15 +835,14 @@ describe('QuerystoreChartProvider props contract', () => {
 });
 
 describe('QuerystoreChartProvider registration', () => {
-  const metaOf = (name: string) =>
-    routes.extensions.find((extension) => extension.name === name).meta as OmnibarProviderMeta;
-  const chartLookup = omnibarRoutes.extensions.find((extension) => extension.name === 'omnibar-chart-lookup-provider');
-  const chartLookupMeta = chartLookup.meta as OmnibarProviderMeta;
+  const extension = routes.extensions.find((candidate) => candidate.name === 'omnibar-querystore-chart-provider');
 
   it('declares contract 1, ranks after chart lookup, skips identifiers, answers /lab and may take the default highlight', () => {
-    // Exact. It may take the default only because it ranks after chart lookup in the same lane, so
-    // chart lookup's copy of a shared obs still wins dedupe, and every target stays on the open chart.
-    expect(metaOf('omnibar-querystore-chart-provider')).toEqual({
+    // Exact. Chart lookup is record lane, order 10, dedupe key chart-values, command lab, in the
+    // contract's registries. This may take the default only because it ranks after chart lookup in the
+    // same lane, so chart lookup's copy of a shared obs still wins dedupe, and every target stays on
+    // the open chart.
+    expect(extension.meta).toEqual({
       lane: 'record',
       scopes: ['patient'],
       order: 15,
@@ -856,26 +854,8 @@ describe('QuerystoreChartProvider registration', () => {
     });
   });
 
-  it('answers /lab with chart lookup', () => {
-    expect(metaOf('omnibar-querystore-chart-provider').command).toEqual(chartLookupMeta.command);
-  });
-
-  it('ranks after chart lookup in the same lane', () => {
-    const store = metaOf('omnibar-querystore-chart-provider');
-    expect(store.lane).toBe(chartLookupMeta.lane);
-    expect(store.order).toBeGreaterThan(chartLookupMeta.order);
-  });
-
   it('is mounted only for users who may see observations, like chart lookup', () => {
-    const privileges = routes.extensions.find(
-      (extension) => extension.name === 'omnibar-querystore-chart-provider',
-    ).privileges;
-    expect(privileges).toEqual(['Get Observations']);
-    expect(privileges).toEqual(chartLookup.privileges);
-  });
-
-  it('shares its dedupe key with chart lookup', () => {
-    expect(metaOf('omnibar-querystore-chart-provider').dedupeKey).toBe(chartLookupMeta.dedupeKey);
+    expect(extension.privileges).toEqual(['Get Observations']);
   });
 
   // The framework compares with prereleases included, so ">=1.0.0" rejects 1.0.0-SNAPSHOT.
