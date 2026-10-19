@@ -1,0 +1,27 @@
+name: OpenMRS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: yarn install --immutable
+      - run: yarn verify
+      - run: yarn build
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: |
+            dist
