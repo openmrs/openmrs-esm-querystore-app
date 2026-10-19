@@ -1,15 +1,18 @@
+import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-// This app registers with the omnibar through the contract alone, as an app in another repo would.
-// Its tests may import the omnibar to prove the two work together; nothing else may.
+// This app registers with the omnibar through the contract alone.
 // Paths, not URLs: the test environment's URL is happy-dom's, which node:fs doesn't accept.
 const appSource = dirname(fileURLToPath(import.meta.url));
 const ownContract = join(appSource, 'omnibar-contract');
-const omnibarContract = join(appSource, '../../../src/omnibar-contract');
 const allowedPackages = ['@openmrs/esm-framework', 'react', 'react-i18next', 'swr'];
+
+// The omnibar's src/omnibar-contract as of pbiondich/openmrs-esm-omnibar-app commit 4ab87d8 (git tree
+// 9a4d7a2). Never edit the copy: copy the omnibar's folder again and update this hash.
+const contractCopySha256 = '21828b65370a675159532047bc674d283b6ca7f0371c4092fc6545b6faa1bbbf';
 
 const filesUnder = (folder: string): Array<string> =>
   readdirSync(folder).flatMap((name) => {
@@ -43,12 +46,16 @@ describe('the query store app', () => {
     }
   });
 
-  it('keeps its copy of the contract folder byte for byte as the omnibar has it', () => {
-    const contents = (folder: string) =>
-      Object.fromEntries(
-        filesUnder(folder).map((path) => [relative(folder, path), readFileSync(path).toString('base64')]),
-      );
-    expect(contents(ownContract)).toEqual(contents(omnibarContract));
+  it('keeps its copy of the contract folder exactly as the omnibar had it', () => {
+    const hash = createHash('sha256');
+    for (const path of filesUnder(ownContract).sort()) {
+      hash
+        .update(relative(ownContract, path).split(sep).join('/'))
+        .update('\0')
+        .update(readFileSync(path))
+        .update('\0');
+    }
+    expect(hash.digest('hex')).toBe(contractCopySha256);
   });
 
   const providers = sourceFiles.filter((file) => /\.provider\.tsx?$/.test(file));
@@ -77,26 +84,6 @@ describe('the query store app', () => {
         file: relative(appSource, path),
         readsUrl: /\blocation\b|\buseParams\b|\bchartPatientIdOf\b|\bchart-path\b/.test(source),
       }).toEqual({ file: relative(appSource, path), readsUrl: false });
-    }
-  });
-});
-
-describe('the omnibar', () => {
-  const repoRoot = join(appSource, '../../..');
-  const omnibarSource = join(repoRoot, 'src');
-  const appName = JSON.parse(readFileSync(join(appSource, '../package.json'), 'utf8')).name;
-
-  it('imports nothing from packages/, tests included', () => {
-    const files = filesUnder(omnibarSource).filter((file) => /\.(tsx?|jsx?|mjs)$/.test(file));
-    expect(files.length).toBeGreaterThan(0);
-    for (const path of files) {
-      const file = relative(omnibarSource, path);
-      const fromPackages = importsOf(readFileSync(path, 'utf8')).filter((specifier) =>
-        specifier.startsWith('.')
-          ? relative(repoRoot, join(dirname(path), specifier)).split(sep)[0] === 'packages'
-          : specifier === appName || specifier.startsWith(`${appName}/`),
-      );
-      expect({ file, fromPackages }).toEqual({ file, fromPackages: [] });
     }
   });
 });
