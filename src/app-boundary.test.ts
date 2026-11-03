@@ -10,9 +10,9 @@ const appSource = dirname(fileURLToPath(import.meta.url));
 const ownContract = join(appSource, 'omnibar-contract');
 const allowedPackages = ['@openmrs/esm-framework', 'react', 'react-i18next', 'swr'];
 
-// The omnibar's src/omnibar-contract as of pbiondich/openmrs-esm-omnibar-app commit b89ca30 (git tree
-// 796b229). Never edit the copy: copy the omnibar's folder again and update this hash.
-const contractCopySha256 = 'd222d45a08d7e63ec9a59aff06e6529b01f0126c4b2e0805ec29ca5794a13f0f';
+// The omnibar's src/omnibar-contract as of openmrs/openmrs-esm-omnibar-app commit ec92784 (git tree
+// 300284f). Never edit the copy: copy the omnibar's folder again and update this hash.
+const contractCopySha256 = 'b615d7f934db99e2000ba9f0adc7c502b8a32b187b89462e6f212b7ec1d2f137';
 
 const filesUnder = (folder: string): Array<string> =>
   readdirSync(folder).flatMap((name) => {

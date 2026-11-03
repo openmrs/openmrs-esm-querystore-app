@@ -28,14 +28,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pbiondich/openmrs-esm-querystore-app.git"
+    "url": "git+https://github.com/openmrs/openmrs-esm-querystore-app.git"
   },
-  "homepage": "https://github.com/pbiondich/openmrs-esm-querystore-app#readme",
+  "homepage": "https://github.com/openmrs/openmrs-esm-querystore-app#readme",
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/pbiondich/openmrs-esm-querystore-app/issues"
+    "url": "https://github.com/openmrs/openmrs-esm-querystore-app/issues"
   },
   "peerDependencies": {
     "@openmrs/esm-framework": "10.x || 11.x",
