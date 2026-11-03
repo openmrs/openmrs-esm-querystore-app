@@ -1,6 +1,6 @@
 # esm-querystore-app
 
-An [omnibar](https://github.com/pbiondich/openmrs-esm-omnibar-app) provider for OpenMRS 3 that finds values in the open chart using the OpenMRS query store. Type `cd4` inside a patient's chart and you get their latest CD4 count, with its date, from the query store's index. With nothing typed, you get the chart's most recent records.
+An [omnibar](https://github.com/openmrs/openmrs-esm-omnibar-app) provider for OpenMRS 3 that finds values in the open chart using the OpenMRS query store. Type `cd4` inside a patient's chart and you get their latest CD4 count, with its date, from the query store's index. With nothing typed, you get the chart's most recent records.
 
 **Status:** prototype. It type-checks, lints, builds and passes its unit tests.
 
@@ -73,7 +73,7 @@ The provider only returns results from a backend that has the `querystore` modul
 
 ## The contract copy
 
-[`src/omnibar-contract/`](src/omnibar-contract/) is a copy of the omnibar's contract folder, and this app talks to the omnibar through it alone. Please don't edit it here. Fix the original in the [omnibar repo](https://github.com/pbiondich/openmrs-esm-omnibar-app), copy the whole folder over again, and update the hash in [`src/app-boundary.test.ts`](src/app-boundary.test.ts), which fails if the copy drifts. The same test checks that the app imports nothing but its own files, that copy, the framework, React, react-i18next and SWR.
+[`src/omnibar-contract/`](src/omnibar-contract/) is a copy of the omnibar's contract folder, and this app talks to the omnibar through it alone. Please don't edit it here. Fix the original in the [omnibar repo](https://github.com/openmrs/openmrs-esm-omnibar-app), copy the whole folder over again, and update the hash in [`src/app-boundary.test.ts`](src/app-boundary.test.ts), which fails if the copy drifts. The same test checks that the app imports nothing but its own files, that copy, the framework, React, react-i18next and SWR.
 
 ## License
 
